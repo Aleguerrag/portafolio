@@ -226,4 +226,12 @@
       e.viewTransition.finished.finally(() => { img.style.viewTransitionName = ''; });
     }
   });
+
+  // 8. Embeds de Instagram a escala: se dibujan a 330 px (su ancho mínimo) y se reducen al marco
+  const clips = [...document.querySelectorAll('.phone .clip')];
+  if (clips.length) {
+    const fit = () => clips.forEach((c) => c.style.setProperty('--s', (c.clientWidth / 330).toFixed(4)));
+    addEventListener('resize', raf(fit));
+    fit();
+  }
 }
