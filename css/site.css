@@ -341,6 +341,7 @@ p{text-wrap:pretty}
 .content{padding:clamp(4.5rem,8vw,7rem) 0;background:var(--sage)}
 .content .kick{font-weight:700;color:var(--orange);margin-bottom:.6rem}
 .content-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.content h2{font-size:clamp(2.1rem,4.2vw,3.4rem);color:var(--green);margin-bottom:0}
 .content-txt{display:grid;gap:1.4rem}
 .content-l .ctas{margin-top:1.4rem}
 .content-r>p{color:var(--muted);font-size:1.06rem;max-width:52ch}
