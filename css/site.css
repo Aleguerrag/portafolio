@@ -355,17 +355,12 @@ p{text-wrap:pretty}
 .phone .clip{--s:.6;position:relative;aspect-ratio:330/500;border-radius:21px;overflow:hidden;background:#fff}
 .phone:nth-child(2){transform:translateY(2.2rem)}
 .phone iframe{position:absolute;top:0;left:0;display:block;width:330px;height:760px;border:0;background:#fff;transform:scale(var(--s));transform-origin:0 0}
-.pieces{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;margin-top:clamp(3.5rem,6vw,5rem)}
-.pieces figure{margin:0;background:var(--white);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-sm)}
-.pieces img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
-.pieces figcaption{padding:.8rem 1rem;font-weight:700;font-size:.92rem;color:var(--green)}
 @media(max-width:980px){.content-grid{grid-template-columns:1fr}}
 @media(max-width:640px){
  .phones{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:.8rem;margin-inline:calc(var(--gut)*-1);padding:0 var(--gut) 1rem;scrollbar-width:none}
  .phone{flex:0 0 62%;scroll-snap-align:center}
  .phones::-webkit-scrollbar{display:none}
  .phone:nth-child(2){transform:none}
- .pieces{grid-template-columns:1fr}
  .content-facts div{grid-template-columns:1fr;gap:.1rem}
 }
 @media(prefers-reduced-motion:reduce){.about .ph video{display:none}.about .ph{background:url(../assets/img/otras-5.webp) 50% 40%/cover}}
