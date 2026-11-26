@@ -367,7 +367,8 @@ p{text-wrap:pretty}
 
 /* ---------- Página de proyectos (blog) ---------- */
 .route .head .ctas{margin-top:1.6rem}
-.blog-head .wrap{padding-block:clamp(1rem,4vw,3rem) 0}
+.blog-head{padding-bottom:clamp(1.5rem,3vw,2.5rem)}
+.blog-head .wrap{padding-block:clamp(.5rem,2vw,1.5rem) 0}
 .blog-head .crumb{margin:0 0 1.2rem}
 .blog-tools{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:.6rem;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);position:sticky;top:84px;z-index:20}
 .filters{display:flex;flex-wrap:wrap;gap:.35rem}
