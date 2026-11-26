@@ -114,39 +114,81 @@
     draw();
   }
 
-  // 6. Carril horizontal: botones, arrastre con ratón y barra de avance
+  // 6. Carril horizontal infinito: botones, arrastre con ratón y barra de avance.
+  // Se clonan las tarjetas antes y después del set original; al salir del set
+  // del centro se salta sin animación al punto equivalente, así nunca hay final.
   document.querySelectorAll('[data-rail]').forEach((wrap) => {
     const rail = wrap.querySelector('.rail');
     const prev = wrap.querySelector('[data-prev]');
     const next = wrap.querySelector('[data-next]');
     const bar = wrap.querySelector('.rail-bar i');
-    const sync = () => {
-      const max = rail.scrollWidth - rail.clientWidth;
-      const p = max > 0 ? rail.scrollLeft / max : 1;
-      if (bar) bar.style.transform = `scaleX(${0.1 + p * 0.9})`;
-      if (prev) prev.disabled = rail.scrollLeft < 4;
-      if (next) next.disabled = rail.scrollLeft > max - 4;
+    const originals = [...rail.querySelectorAll('.card')];
+    const n = originals.length;
+    if (!n) return;
+    const clone = (c) => {
+      const k = c.cloneNode(true);
+      k.setAttribute('aria-hidden', 'true');
+      k.setAttribute('tabindex', '-1');
+      k.dataset.clone = '';
+      k.querySelectorAll('a,button').forEach((x) => x.setAttribute('tabindex', '-1'));
+      return k;
     };
-    const cards = [...rail.querySelectorAll('.card')];
+    originals.forEach((c) => rail.append(clone(c)));
+    [...originals].reverse().forEach((c) => rail.prepend(clone(c)));
+    const cards = [...rail.querySelectorAll('.card')]; // 3 sets: [clones][originales][clones]
     const pad = () => parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0;
-    const stops = () => cards.map((c) => Math.min(c.offsetLeft - pad(), rail.scrollWidth - rail.clientWidth));
-    const go = (left) => rail.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
+    const posOf = (i) => cards[i].offsetLeft - pad();
+    const setW = () => cards[n].offsetLeft - cards[0].offsetLeft;
+    const stops = () => cards.map((c, i) => posOf(i));
+    let busy = false;
+    const jump = (left) => {
+      rail.classList.add('jump');
+      rail.scrollLeft = left;
+      requestAnimationFrame(() => rail.classList.remove('jump'));
+    };
+    // si quedamos en un set clonado, volvemos al del centro en la misma posición visual
+    const recenter = () => {
+      const w = setW(), x = rail.scrollLeft, start = posOf(n);
+      if (x < start - 4) jump(x + w);
+      else if (x >= start + w - 4) jump(x - w);
+    };
+    const sync = () => {
+      const w = setW();
+      const p = w > 0 ? (((rail.scrollLeft - posOf(n)) % w) + w) % w / w : 0;
+      if (bar) bar.style.transform = `scaleX(${0.1 + p * 0.9})`;
+    };
+    const go = (left) => {
+      busy = true;
+      rail.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
+    };
+    const settle = () => { busy = false; recenter(); sync(); };
+    let idle;
+    rail.addEventListener('scroll', () => {
+      sync();
+      clearTimeout(idle);
+      idle = setTimeout(() => { if (!down) settle(); }, 140);
+    }, { passive: true });
+    if ('onscrollend' in rail) rail.addEventListener('scrollend', () => { if (!down) settle(); });
     const page = (dir) => {
+      if (busy) recenter();
       const x = rail.scrollLeft, list = stops();
       const target = dir > 0 ? list.find((v) => v > x + 4) : [...list].reverse().find((v) => v < x - 4);
-      go(target === undefined ? (dir > 0 ? rail.scrollWidth : 0) : target);
+      if (target !== undefined) go(target);
     };
     prev && prev.addEventListener('click', () => page(-1));
     next && next.addEventListener('click', () => page(1));
-    rail.addEventListener('scroll', raf(sync), { passive: true });
-    addEventListener('resize', raf(sync));
-    sync();
+    const init = () => { jump(posOf(n)); sync(); };
+    addEventListener('resize', raf(init));
+    addEventListener('load', init);
+    init();
 
     // arrastre con ratón (en táctil manda el gesto nativo)
+    let down = false;
     if (fine) {
-      let down = false, startX = 0, startL = 0, moved = false;
+      let startX = 0, startL = 0, moved = false;
       rail.addEventListener('pointerdown', (e) => {
         if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        recenter();
         down = true; moved = false; startX = e.clientX; startL = rail.scrollLeft;
       });
       addEventListener('pointermove', (e) => {
@@ -161,9 +203,9 @@
         if (moved) {
           // encaja en la tarjeta más cercana y solo entonces devuelve el snap nativo
           const x = rail.scrollLeft, list = stops();
-          const near = list.reduce((a, b) => (Math.abs(b - x) < Math.abs(a - x) ? b : a), 0);
+          const near = list.reduce((a, b) => (Math.abs(b - x) < Math.abs(a - x) ? b : a), list[0]);
           const done = () => rail.classList.remove('drag');
-          if (Math.abs(near - x) < 1) { done(); return; }
+          if (Math.abs(near - x) < 1) { done(); settle(); return; }
           go(near);
           if ('onscrollend' in rail) rail.addEventListener('scrollend', done, { once: true });
           setTimeout(done, 450);

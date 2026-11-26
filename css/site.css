@@ -198,6 +198,7 @@ p{text-wrap:pretty}
   padding:6px max(var(--gut),(100vw - var(--max))/2) 26px;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab}
 .rail::-webkit-scrollbar{display:none}
 .rail.drag{cursor:grabbing;scroll-snap-type:none}
+.rail.jump{scroll-snap-type:none;scroll-behavior:auto}
 .rail.drag a{pointer-events:none}
 .card{flex:none;width:min(360px,78vw);scroll-snap-align:start;text-decoration:none;display:block}
 .card.tall .pic{aspect-ratio:3/4}
