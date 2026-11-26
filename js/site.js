@@ -234,4 +234,44 @@
     addEventListener('resize', raf(fit));
     fit();
   }
+
+  // 9. Página de proyectos: filtros por área y búsqueda
+  const posts = document.querySelector('[data-posts]');
+  if (posts) {
+    const items = [...posts.querySelectorAll('.post')];
+    const btns = [...document.querySelectorAll('.filters [data-f]')];
+    const q = document.querySelector('[data-search]');
+    const count = document.querySelector('[data-count]');
+    const empty = document.querySelector('[data-empty]');
+    const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let cat = 'todos';
+    const apply = () => {
+      const term = norm(q ? q.value.trim() : '');
+      let n = 0;
+      items.forEach((it) => {
+        const ok = (cat === 'todos' || it.dataset.cat.split(' ').includes(cat)) && (!term || norm(it.textContent).includes(term));
+        it.hidden = !ok; if (ok) n++;
+      });
+      // el destacado solo ocupa todo el ancho cuando se ven todos
+      const all = cat === 'todos' && !term;
+      items.forEach((it) => { it.classList.toggle('feat', it.dataset.feat === '1' && all); it.classList.toggle('wide', it.dataset.wide === '1' && all); });
+      if (count) count.textContent = n === 1 ? '1 proyecto' : `${n} proyectos`;
+      if (empty) empty.hidden = n > 0;
+    };
+    items.forEach((it) => { if (it.classList.contains('feat')) it.dataset.feat = '1'; });
+    btns.forEach((b) => b.addEventListener('click', () => {
+      cat = b.dataset.f;
+      btns.forEach((x) => x.setAttribute('aria-pressed', x === b));
+      const u = new URL(location.href);
+      cat === 'todos' ? u.searchParams.delete('area') : u.searchParams.set('area', cat);
+      history.replaceState(null, '', u);
+      apply();
+    }));
+    q && q.addEventListener('input', apply);
+    const r = document.querySelector('[data-reset]');
+    r && r.addEventListener('click', () => { if (q) q.value = ''; btns[0].click(); });
+    const start = new URL(location.href).searchParams.get('area');
+    const sb = start && btns.find((b) => b.dataset.f === start);
+    sb ? sb.click() : apply();
+  }
 }
